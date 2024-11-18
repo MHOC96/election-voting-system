@@ -7,6 +7,8 @@ def admin_login():
     try:
         print("Welcome to the admin dash board")
         admin_login_connection = database_connection()
+        if admin_login_connection is None:
+            print("Database connection failed")
         admin_find_cursor = admin_login_connection.cursor()
 
         admin_email = input("Enter admin email:")
@@ -47,6 +49,8 @@ def admin_login():
 def find_nominee_if_already_exit(name):
     try:
         find_nominee = database_connection()
+        if find_nominee is None:
+            print("Database connection failed")
         find_nominee_cursor = find_nominee.cursor()
         query = f"select name from nominee where name=%s"
         find_nominee_cursor.execute(query, (name,))
@@ -71,6 +75,8 @@ def find_nominee_if_already_exit(name):
 def add_nominees():
     try:
         adding_nominee = database_connection()
+        if add_nominees is None:
+            print("Database connection failed")
         adding_nominee_cursor = adding_nominee.cursor()
         while True:
             nominee_name = input("Enter nominee_name:")
@@ -104,6 +110,8 @@ def calculate():
     try:
         nominee_see()
         admin_featuers = database_connection()
+        if admin_featuers is None:
+            print("Database connection failed")
         count_find_cursor = admin_featuers.cursor()
         nominee_id = int(input("Enter nominee_id admin want to see:"))
 
@@ -139,11 +147,13 @@ def admin_main():
         print("Press 1 to add nominee details\npress 2 to show results")
         while True:
             try:
-                admin_function = int(input("What functions admin need to performe:"))
-                if admin_function == 1:
+                admin_function = input("What functions admin need to performe(type exit to exit):")
+                if admin_function == "1":
                     add_nominees()
-                elif admin_function == 2:
+                elif admin_function == "2":
                     calculate()
+                elif admin_function=="exit":
+                    break
 
                 need_addition = input("Do admin need another service(yes/no):").lower()
 

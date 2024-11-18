@@ -8,6 +8,8 @@ from mysql.connector import IntegrityError
 def get_voter_details(nic):
     try:
         voter_connection = database_connection()
+        if voter_connection is None:
+            print("Database connection failed")
         voter_details_get_cursor = voter_connection.cursor()
 
         query = "select nic_number,name,electoral_district,electorates from voter_details where nic_number=%s"
@@ -31,6 +33,8 @@ def get_voter_details(nic):
 def voter_vote():
     print("Welcome to the voting process")
     voter_vote_connection = database_connection()
+    if voter_vote_connection is None:
+        print("Database connection failed")
     voter_vote_cursor = voter_vote_connection.cursor()
 
     try:
@@ -41,9 +45,12 @@ def voter_vote():
             st_nic, st_name, st_electoral_district, st_electorate = voter_detals
 
             while True:
-                voter_name = input("Enter voter name(Need to enter name in NIC):")
+                voter_name = input("Enter voter name(Need to enter name in NIC/Type exit to exit from voting process):").lower()
 
-                if voter_name != st_name:
+                if voter_name=="exit":
+                    break
+                
+                elif voter_name != st_name:
                     print("Name does not match with NIC number you entered:")
                     continue
 
@@ -54,13 +61,13 @@ def voter_vote():
                         f"{voter_name} is  not belong to Electoral District :{eletoral_disctrict} "
                     )
 
-                if electorate != st_electorate:
+                elif electorate != st_electorate:
                     print(
                         f"{voter_name} is belong to Electoral District :{eletoral_disctrict} but not belong to Electorate:{electorate}"
                     )
                     continue
 
-                print("You are eligible for voting")
+                print(f"voter:{voter_name} is eligible for voting")
                 nominee_see()
 
                 vote_nominee = int(input("Enter nominee id you wish to vote:"))

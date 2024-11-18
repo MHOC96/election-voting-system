@@ -5,6 +5,8 @@ from tabulate import tabulate
 def nominee_see():
     try:
         nominee_view_connection = database_connection()
+        if nominee_view_connection is None:
+            print("Database connection failed")
         see_nominee_cursor = nominee_view_connection.cursor()
         nominee_see_query = "select * from nominee"
         see_nominee_cursor.execute(nominee_see_query)

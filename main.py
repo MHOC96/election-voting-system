@@ -4,7 +4,7 @@ from admin import admin_main
 
 def main():
     try:
-        print("Welcome to the E-Voting System This is demo")
+        print("Welcome to the E-Voting System This is a demo")
         while True:
             order = input("Type vote to enter to voting process:").lower()
             if order == "vote":
