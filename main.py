@@ -2,22 +2,25 @@ from voter import voter_vote
 from admin import admin_main
 
 
-def main():
+def start_system():
     try:
-        print("Welcome to the E-Voting System This is a demo")
+        print("Welcome to the E-Voting System! This is a demo.")
+        
         while True:
-            order = input("Type vote to enter to voting process:").lower()
-            if order == "vote":
+            user_input = input("Type 'vote' to enter the voting process: ").lower()
+            
+            if user_input == "vote":
                 voter_vote()
                 break
-            elif order == "admin-voting":
+            elif user_input == "admin-voting":
                 admin_main()
                 break
             else:
-                print("Please type 'vote' to enter voting process")
+                print("Invalid input. Please type 'vote' to enter the voting process.")
+    
     except Exception as e:
-        print(f"Error found:{e}")
+        print(f"Error encountered: {e}")
 
 
 if __name__ == "__main__":
-    main()
+    start_system()

@@ -1,167 +1,167 @@
 from connection import database_connection
-from nominee_see import nominee_see
+from admin_count_functions import *
 
 
 def admin_login():
-
     try:
-        print("Welcome to the admin dash board")
-        admin_login_connection = database_connection()
-        if admin_login_connection is None:
-            print("Database connection failed")
-        admin_find_cursor = admin_login_connection.cursor()
+        print("Welcome to the admin dashboard")
+        admin_connection = database_connection()
 
-        admin_email = input("Enter admin email:")
-        query = "select password from admin where email=%s"
-        admin_find_cursor.execute(query, (admin_email,))
-        password_details = admin_find_cursor.fetchone()
-        attempts = 3
-        while attempts:
-            if password_details:
-                admin_stored_password = password_details[0]
-                admin_password = input("Enter admin password:")
-                if admin_password == admin_stored_password:
+        if not admin_connection:
+            print("Database connection failed")
+            return None
+
+        admin_cursor = admin_connection.cursor()
+        
+        max_email_attempts = 3
+        max_password_attempts = 3
+        
+        for email_attempt in range(max_email_attempts):
+            admin_email = input("Enter admin email:").strip()
+            query = "SELECT password FROM admin WHERE email=%s"
+            admin_cursor.execute(query, (admin_email,))
+            password_details = admin_cursor.fetchone()
+            
+            if not password_details:
+                remaining_email_attempts = max_email_attempts - email_attempt - 1
+                print(f"Incorrect email address. You have {remaining_email_attempts} attempts remaining.")
+                continue
+
+            for password_attempt in range(max_password_attempts):
+                stored_password = password_details[0]
+                admin_password = input("Enter admin password:").strip()
+                if admin_password == stored_password:
                     print("Welcome admin")
                     return True
-                elif attempts == 0:
-                    print("Your attempts are finished. Access locked")
-                    break
                 else:
-                    print(
-                        f"Incorrect password You have {attempts-1} attempts remaining "
-                    )
-                    attempts -= 1
-
-            else:
-                print("Not a admin")
-                break
-        if attempts == 0:
-            print("Your attempts are finished. Access locked")
-    
-    except Exception as e:
-        print(f"error found:{e}")
-    
-    finally:
-        admin_find_cursor.close()
-        admin_login_connection.close()
-
-
-def find_nominee_if_already_exit(name):
-    try:
-        find_nominee = database_connection()
-        if find_nominee is None:
-            print("Database connection failed")
-        find_nominee_cursor = find_nominee.cursor()
-        query = f"select name from nominee where name=%s"
-        find_nominee_cursor.execute(query, (name,))
-        nominee_detail = find_nominee_cursor.fetchone()
-        
-        if nominee_detail:
-            find_nominee_cursor.close()
-            find_nominee.close()
+                    remaining_password_attempts = max_password_attempts - password_attempt - 1
+                    print(f"Incorrect password. You have {remaining_password_attempts} attempts remaining.")
+            
+            print("Your password attempts are finished. Access locked.")
             return False
-        find_nominee_cursor.close()
-        find_nominee.close()
-        return True
-    
+        
+        print("Your email attempts are finished. Access locked.")
+        return False
+
     except Exception as e:
-        print(f"Error found:{e}")
-    
+        print(f"Error found: {e}")
+        return False
+
     finally:
-        find_nominee.close()
-        find_nominee_cursor.close()
+        admin_cursor.close()
+        admin_connection.close()
 
 
-def add_nominees():
+def nominee_exists(name):
     try:
-        adding_nominee = database_connection()
-        if add_nominees is None:
+        connection = database_connection()
+
+        if not connection:
             print("Database connection failed")
-        adding_nominee_cursor = adding_nominee.cursor()
+            return None
+
+        cursor = connection.cursor()
+        query = "SELECT name FROM nominee WHERE name=%s"
+        cursor.execute(query, (name,))
+        nominee_details = cursor.fetchone()
+
+        if nominee_details:
+            cursor.close()
+            connection.close()
+            return False
+        
+        return True
+
+    except Exception as e:
+        print(f"Error found: {e}")
+        return None
+
+    finally:
+        connection.close()
+        cursor.close()
+
+
+def add_nominee_details():
+    try:
+        connection = database_connection()
+        if not connection:
+            print("Database connection failed")
+            return False
+
+        cursor = connection.cursor()
         while True:
-            nominee_name = input("Enter nominee_name:")
+            nominee_name = input("Enter nominee name:")
 
-            if find_nominee_if_already_exit(nominee_name) == True:
-                nominee_party = input("Enter nominee_party:")
-                query = "insert into nominee(name,nominee_party) values(%s,%s)"
-                adding_nominee_cursor.execute(query, (nominee_name, nominee_party))
-                adding_nominee.commit()
-                print(
-                    f"sucuessfully add\nnominee name:{nominee_name}\nnominee party:{nominee_party}"
-                )
+            if nominee_exists(nominee_name):
+                nominee_party = input("Enter nominee party:")
+                query = "INSERT INTO nominee(name, nominee_party) VALUES(%s, %s)"
+                cursor.execute(query, (nominee_name, nominee_party))
+                connection.commit()
+                print(f"Successfully added nominee\nNominee name: {nominee_name}\nNominee party: {nominee_party}")
 
-                ask = input("Do you need to add another nominee(yes/no):").lower()
+                ask = input("Do you need to add another nominee? (yes/no):").lower().strip()
                 if ask == "no":
                     break
             else:
-                print(
-                    f"{nominee_name} already registered please enter another nominee name"
-                )
+                print(f"{nominee_name} is already registered. Please enter another nominee name.")
                 continue
+
     except Exception as e:
-        print(f"Error found:{e}")
+        print(f"Error found: {e}")
+        return False
 
     finally:
-        adding_nominee_cursor.close()
-        adding_nominee.close()
+        cursor.close()
+        connection.close()
 
 
-def calculate():
+def admin_vote_options():
     try:
-        nominee_see()
-        admin_featuers = database_connection()
-        if admin_featuers is None:
-            print("Database connection failed")
-        count_find_cursor = admin_featuers.cursor()
-        nominee_id = int(input("Enter nominee_id admin want to see:"))
+        while True:
+            print("Select an option:")
+            print("1 - Individual count")
+            print("2 - Get top 3 nominees")
+            print("exit - Exit the program")
 
-        query = """
-        SELECT n.nominee_id, n.name, n.nominee_party, COUNT(v.nic_no) AS total_votes
-        FROM nominee n
-        JOIN voter v ON n.nominee_id = v.nominee_id
-        WHERE n.nominee_id = %s
-        GROUP BY n.nominee_id, n.name, n.nominee_party;
-        """
-        count_find_cursor.execute(query, (nominee_id,))
-        result = count_find_cursor.fetchone()
-
-        if result:
-            print("Nominee ID:", result[0])
-            print("Name:", result[1])
-            print("Party:", result[2])
-            print("Total Votes:", result[3])
-        else:
-            print("No votes found for nominee_id =", nominee_id)
-
+            option_choice = input("Enter your choice:").strip().lower()
+            
+            if option_choice in ("1", "2", "exit"):
+                if option_choice == "1":
+                    individual_nominee_vote()
+                elif option_choice == "2":
+                    get_top3_nominees()
+                elif option_choice == "exit":
+                    print("Exiting the program. Goodbye!")
+                    break
+            else:
+                print("Invalid input. Please enter '1', '2', or 'exit'.")
     except Exception as e:
-        print(f"Error found:{e}")
-
-    finally:
-        count_find_cursor.close()
-        admin_featuers.close()
+        print(f"Error found: {e}")
 
 
 def admin_main():
-    if admin_login() == True:
-
-        print("Press 1 to add nominee details\npress 2 to show results")
+    if admin_login():
+        print("Press 1 to add nominee details\nPress 2 to show results")
         while True:
             try:
-                admin_function = input("What functions admin need to performe(type exit to exit):")
-                if admin_function == "1":
-                    add_nominees()
-                elif admin_function == "2":
-                    calculate()
-                elif admin_function=="exit":
-                    break
+                admin_function = input("What function would the admin like to perform? (Type 'exit' to exit):").lower().strip()
 
-                need_addition = input("Do admin need another service(yes/no):").lower()
+                if admin_function == "1":
+                    add_nominee_details()
+                elif admin_function == "2":
+                    admin_vote_options()
+                elif admin_function == "exit":
+                    print("Exiting the program. Goodbye!")
+                    break
+                else:
+                    print("Invalid option. Please enter '1', '2', or 'exit'.")
+                    continue
+            
+                need_addition = input("Would the admin like to perform another action? (yes/no): ").lower().strip()
 
                 if need_addition != "yes":
-                    print("Thanks")
+                    print("Thanks for using the admin dashboard. Goodbye!")
                     break
 
-            except ValueError as e:
-                print("Please enter 1 or 2 only")
-
-
+            except Exception as e:
+                print(f"An error occurred: {e}")

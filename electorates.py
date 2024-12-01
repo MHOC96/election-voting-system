@@ -1,8 +1,8 @@
 from tabulate import tabulate
 
 
-def electoral_district_electorates():
-    data = [
+def display_electoral_districts():
+    district_data = [
         [1, "Colombo", "Maharagama", "Dehiwala"],
         [2, "Gampaha", "Negombo", "Gampaha"],
         [3, "Kalutara", "Panadura", "Kalutara"],
@@ -26,34 +26,34 @@ def electoral_district_electorates():
         [21, "Ratnapura", "Rakwana", "Kolonna"],
         [22, "Kegalle", "Aranayake", "Yatiyantota"],
     ]
-    headers_name = [
+    
+    headers = [
         "District Number",
         "Electoral District",
         "Electorate 1",
         "Electorate 2",
     ]
 
-    print(tabulate(data, headers=headers_name, tablefmt="grid"))
+    print(tabulate(district_data, headers=headers, tablefmt="grid"))
+    
     while True:
         try:
-            district_number = int(input("Enter a District number between 1 and 22:"))
+            district_number = int(input("\nEnter a District number between 1 and 22:"))
             if district_number in range(1, 23):
-                electoral_District = data[district_number - 1][1]
-                electorate_number = int(
-                    input("Enter 1 for Electorate 1, or 2 for Electorate 2:")
-                )
-                if electorate_number in [1, 2]:
-                    electorate = data[district_number - 1][electorate_number + 1]
-                    print(f"Selected Electoral District: {electoral_District}")
+                electoral_district = district_data[district_number - 1][1]
+                electorate_choice = int(input("Enter 1 for Electorate 1, or 2 for Electorate 2:"))
+                
+                if electorate_choice in [1, 2]:
+                    electorate = district_data[district_number - 1][electorate_choice + 1]
+                    print(f"\nSelected Electoral District: {electoral_district}")
                     print(f"Selected Electorate: {electorate}")
-                    return electoral_District, electorate
+                    return electoral_district, electorate
                 else:
-                    print("Invalid choice  Please enter 1 or 2")
+                    print("\nInvalid choice. Please enter 1 or 2.")
                     continue
             else:
-                print("Invalid district number  Please enter a number between 1 and 22")
+                print("\nInvalid district number. Please enter a number between 1 and 22.")
                 continue
-        except ValueError as e:
-            print(" Please enter numeric values only")
+        except ValueError:
+            print("\nInvalid input. Please enter numeric values only.")
             continue
-
