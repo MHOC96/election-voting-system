@@ -55,6 +55,7 @@ def individual_nominee_vote():
             return
 
         count_find_cursor = vote_count.cursor()
+        display_nominee_list()
         nominee_id = int(input("Enter nominee_id admin wants to see:"))
 
         query = """
