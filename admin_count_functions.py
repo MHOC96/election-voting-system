@@ -34,7 +34,6 @@ def get_top3_nominees():
         table_data=[]
 
         for rank,nominee_details in enumerate(top_3_find_cursor.fetchall(), start=1):
-                print(nominee_details,rank)
                 nominee_id,nominee_name,nominee_party,votes=nominee_details
                 table_data.append([rank,nominee_name,nominee_party,votes])
 
