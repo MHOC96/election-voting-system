@@ -50,7 +50,6 @@ def get_top3_nominees():
 
 def individual_nominee_vote():
     try:
-        di()
         vote_count = database_connection()
         if not vote_count :
             print("Database connection failed")
